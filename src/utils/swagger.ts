@@ -13,16 +13,6 @@ const swaggerOptions = {
         email: 'support@nearbook.com',
       },
     },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-        description: 'Development server',
-      },
-      {
-        url: 'https://nearbook-be.onrender.com',
-        description: 'Production server',
-      },
-    ],
     components: {
       securitySchemes: {
         bearerAuth: {
