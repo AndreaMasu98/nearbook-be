@@ -27,7 +27,8 @@ export async function getNearbyBooks(req: Request, res: Response): Promise<void>
         l.visualizzazioni,
         u.nome AS utente_nome,
         u.cognome AS utente_cognome,
-        -- Distanza in metri dalla posizione dell'utente
+        ST_X(l.posizione) AS longitudine,
+        ST_Y(l.posizione) AS latitudine,
         ST_Distance(
           l.posizione::geography,
           ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography
@@ -35,7 +36,6 @@ export async function getNearbyBooks(req: Request, res: Response): Promise<void>
       FROM libri l
       JOIN utenti u ON l.utente_id = u.id
       WHERE
-        -- ST_DWithin filtra i record entro il raggio (in metri, sulla sfera)
         ST_DWithin(
           l.posizione::geography,
           ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography,
