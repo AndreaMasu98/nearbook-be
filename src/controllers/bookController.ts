@@ -71,21 +71,38 @@ export async function getNearbyBooks(req: Request, res: Response): Promise<void>
 // GET /api/books/:id
 export async function getBookById(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
+  const { lat, lng } = req.query;
+
   try {
-    const result = await pool.query(
-      `SELECT l.*, u.nome AS utente_nome, u.cognome AS utente_cognome,
-              ST_Y(l.posizione::geometry) AS lat, ST_X(l.posizione::geometry) AS lng
-       FROM libri l JOIN utenti u ON l.utente_id = u.id
-       WHERE l.id = $1`,
-      [id]
-    );
+    let query = `
+      SELECT l.*, u.nome AS utente_nome, u.cognome AS utente_cognome,
+             ST_Y(l.posizione::geometry) AS lat, ST_X(l.posizione::geometry) AS lng
+    `;
+
+    const params: any[] = [id];
+
+    if (lat && lng) {
+      query += `,
+        ST_Distance(
+          l.posizione::geography,
+          ST_SetSRID(ST_MakePoint($3, $2), 4326)::geography
+        ) AS distanza_metri
+      `;
+      params.push(Number(lat), Number(lng));
+    }
+
+    query += `
+      FROM libri l JOIN utenti u ON l.utente_id = u.id
+      WHERE l.id = $1
+    `;
+
+    const result = await pool.query(query, params);
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Libro non trovato' });
       return;
     }
 
-    // Incrementa visualizzazioni
     pool.query('UPDATE libri SET visualizzazioni = visualizzazioni + 1 WHERE id = $1', [id]);
 
     res.json({ book: result.rows[0] });
