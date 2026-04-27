@@ -122,6 +122,102 @@ export async function createBook(req: AuthRequest, res: Response): Promise<void>
   }
 }
 
+// PATCH /api/books/:id  (modifica libro - solo il proprietario)
+export async function updateBook(req: AuthRequest, res: Response): Promise<void> {
+  const { id } = req.params;
+  const { titolo, autore, anno, categoria, descrizione, disponibile } = req.body;
+  const coverPath = (req as any).coverPath || null;
+  const thumbPath = (req as any).thumbPath || null;
+
+  try {
+    // Verifica che il libro esista e appartenga all'utente
+    const bookCheck = await pool.query(
+      'SELECT id FROM libri WHERE id = $1 AND utente_id = $2',
+      [id, req.userId]
+    );
+
+    if (bookCheck.rows.length === 0) {
+      res.status(404).json({ error: 'Libro non trovato o non autorizzato' });
+      return;
+    }
+
+    // Costruisci la query UPDATE dinamicamente
+    const updates: string[] = [];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (titolo !== undefined) {
+      updates.push(`titolo = $${paramIndex}`);
+      params.push(titolo);
+      paramIndex++;
+    }
+
+    if (autore !== undefined) {
+      updates.push(`autore = $${paramIndex}`);
+      params.push(autore);
+      paramIndex++;
+    }
+
+    if (anno !== undefined) {
+      updates.push(`anno = $${paramIndex}`);
+      params.push(anno);
+      paramIndex++;
+    }
+
+    if (categoria !== undefined) {
+      updates.push(`categoria = $${paramIndex}`);
+      params.push(categoria);
+      paramIndex++;
+    }
+
+    if (descrizione !== undefined) {
+      updates.push(`descrizione = $${paramIndex}`);
+      params.push(descrizione);
+      paramIndex++;
+    }
+
+    if (disponibile !== undefined) {
+      updates.push(`disponibile = $${paramIndex}`);
+      params.push(disponibile);
+      paramIndex++;
+    }
+
+    if (coverPath !== null) {
+      updates.push(`cover_path = $${paramIndex}`);
+      params.push(coverPath);
+      paramIndex++;
+    }
+
+    if (thumbPath !== null) {
+      updates.push(`thumb_path = $${paramIndex}`);
+      params.push(thumbPath);
+      paramIndex++;
+    }
+
+    if (updates.length === 0) {
+      res.status(400).json({ error: 'Nessun campo da aggiornare' });
+      return;
+    }
+
+    params.push(id);
+    params.push(req.userId);
+
+    const query = `
+      UPDATE libri
+      SET ${updates.join(', ')}
+      WHERE id = $${paramIndex} AND utente_id = $${paramIndex + 1}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, params);
+
+    res.json({ book: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore nell\'aggiornamento del libro' });
+  }
+}
+
 // DELETE /api/books/:id  (solo il proprietario)
 export async function deleteBook(req: AuthRequest, res: Response): Promise<void> {
   const { id } = req.params;
@@ -158,13 +254,13 @@ export async function getMyBooks(req: AuthRequest, res: Response): Promise<void>
          l.visualizzazioni,
          ST_X(l.posizione) AS lng,
          ST_Y(l.posizione) AS lat,
-         l.data_creazione,
+         l.creato_il,
          u.nome AS utente_nome,
          u.cognome AS utente_cognome
        FROM libri l
        JOIN utenti u ON l.utente_id = u.id
        WHERE l.utente_id = $1
-       ORDER BY l.data_creazione DESC`,
+       ORDER BY l.creato_il DESC`,
       [req.userId]
     );
 

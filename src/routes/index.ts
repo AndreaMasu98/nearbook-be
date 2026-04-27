@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { register, login } from '../controllers/authController';
 import {
-  getNearbyBooks, getBookById, createBook, deleteBook, getMyBooks, getMyStats
+  getNearbyBooks, getBookById, createBook, updateBook, deleteBook, getMyBooks, getMyStats
 } from '../controllers/bookController';
 import { requestLoan, getReceivedLoans, updateLoanStatus } from '../controllers/loanController';
 import { authMiddleware } from '../middleware/auth';
@@ -188,6 +188,50 @@ router.get('/books/:id', getBookById);
  *         description: Libro creato con successo
  */
 router.post('/books', authMiddleware, upload.single('cover'), processImage, createBook);
+
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   patch:
+ *     summary: Modifica un libro (tranne geolocalizzazione)
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               titolo:
+ *                 type: string
+ *               autore:
+ *                 type: string
+ *               anno:
+ *                 type: integer
+ *               categoria:
+ *                 type: string
+ *               descrizione:
+ *                 type: string
+ *               disponibile:
+ *                 type: boolean
+ *               cover:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Libro aggiornato con successo
+ *       404:
+ *         description: Libro non trovato o non autorizzato
+ */
+router.patch('/books/:id', authMiddleware, upload.single('cover'), processImage, updateBook);
 
 /**
  * @swagger
