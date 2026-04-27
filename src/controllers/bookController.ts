@@ -141,6 +141,40 @@ export async function deleteBook(req: AuthRequest, res: Response): Promise<void>
   }
 }
 
+// GET /api/books/my-books  (ottieni i libri caricati dall'utente loggato)
+export async function getMyBooks(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const result = await pool.query(
+      `SELECT
+         l.id,
+         l.titolo,
+         l.autore,
+         l.anno,
+         l.categoria,
+         l.descrizione,
+         l.cover_path,
+         l.thumb_path,
+         l.disponibile,
+         l.visualizzazioni,
+         ST_X(l.posizione) AS lng,
+         ST_Y(l.posizione) AS lat,
+         l.data_creazione,
+         u.nome AS utente_nome,
+         u.cognome AS utente_cognome
+       FROM libri l
+       JOIN utenti u ON l.utente_id = u.id
+       WHERE l.utente_id = $1
+       ORDER BY l.data_creazione DESC`,
+      [req.userId]
+    );
+
+    res.json({ books: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore nel recupero dei tuoi libri' });
+  }
+}
+
 // GET /api/books/stats/me  (statistiche dell'utente loggato)
 export async function getMyStats(req: AuthRequest, res: Response): Promise<void> {
   try {

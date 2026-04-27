@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { register, login } from '../controllers/authController';
 import {
-  getNearbyBooks, getBookById, createBook, deleteBook, getMyStats
+  getNearbyBooks, getBookById, createBook, deleteBook, getMyBooks, getMyStats
 } from '../controllers/bookController';
 import { requestLoan, getReceivedLoans, updateLoanStatus } from '../controllers/loanController';
 import { authMiddleware } from '../middleware/auth';
@@ -93,6 +93,29 @@ router.post('/auth/login', login);
  *         description: Lista dei libri trovati
  */
 router.get('/books', getNearbyBooks);
+
+/**
+ * @swagger
+ * /api/books/my-books:
+ *   get:
+ *     summary: Ottieni i libri caricati da me
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista dei miei libri
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 books:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Book'
+ */
+router.get('/books/my-books', authMiddleware, getMyBooks);
 
 /**
  * @swagger
