@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+/* Configurazione del pool di connessioni PostgreSQL. Utilizza DATABASE_URL da .env e SSL per connessione sicura. */
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {

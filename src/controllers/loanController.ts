@@ -2,7 +2,8 @@ import { Response } from 'express';
 import pool from '../models/db';
 import { AuthRequest } from '../middleware/auth';
 
-// POST /api/loans  - Richiedi prestito (simulata)
+// POST /api/loans
+/* Permette a un utente di richiedere il prestito di un libro. */
 export async function requestLoan(req: AuthRequest, res: Response): Promise<void> {
   const { libro_id, messaggio } = req.body;
 
@@ -46,7 +47,8 @@ export async function requestLoan(req: AuthRequest, res: Response): Promise<void
   }
 }
 
-// GET /api/loans/received  - Richieste ricevute (io sono il proprietario)
+// GET /api/loans/received
+/* Permette a un utente di vedere le richieste di prestito ricevute per i suoi libri. */
 export async function getReceivedLoans(req: AuthRequest, res: Response): Promise<void> {
   try {
     const result = await pool.query(
@@ -65,7 +67,8 @@ export async function getReceivedLoans(req: AuthRequest, res: Response): Promise
   }
 }
 
-// PATCH /api/loans/:id  - Accetta o rifiuta una richiesta
+// PATCH /api/loans/:id
+/* Permette a un utente di accettare o rifiutare una richiesta di prestito ricevuta. */
 export async function updateLoanStatus(req: AuthRequest, res: Response): Promise<void> {
   const { id } = req.params;
   const { stato } = req.body; // 'accettata' | 'rifiutata'

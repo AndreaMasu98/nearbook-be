@@ -8,6 +8,7 @@ import { authMiddleware } from '../middleware/auth';
 import { upload, processImage } from '../middleware/upload';
 
 const router = Router();
+/* Definizione delle rotte API per autenticazione, gestione libri e prestiti. Utilizza middleware per autenticazione e upload immagini. */
 
 /**
  * @swagger

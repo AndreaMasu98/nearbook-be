@@ -1,6 +1,9 @@
+/* Schema SQL per NearBook: definisce tabelle utenti, libri e richieste di prestito. Utilizza PostGIS per geolocalizzazione. Include dati di test. */
+
 CREATE EXTENSION IF NOT EXISTS postgis;
 
---  TABELLA: utenti
+/* TABELLA: utenti */
+
 CREATE TABLE IF NOT EXISTS utenti (
   id             SERIAL PRIMARY KEY,
   nome           VARCHAR(100) NOT NULL,
@@ -13,10 +16,11 @@ CREATE TABLE IF NOT EXISTS utenti (
   aggiornato_il  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
---  TABELLA: libri
---  La colonna `posizione` usa il tipo geometry(Point, 4326)
---  dove 4326 = WGS84 (lo stesso sistema del GPS)
---  ST_MakePoint(lng, lat). attenzione: X=lng, Y=lat
+/* TABELLA: libri */
+/* La colonna `posizione` usa il tipo geometry(Point, 4326) */
+/* dove 4326 = WGS84 (lo stesso sistema del GPS) */
+/* ST_MakePoint(lng, lat). attenzione: X=lng, Y=lat */
+
 CREATE TABLE IF NOT EXISTS libri (
   id             SERIAL PRIMARY KEY,
   titolo         VARCHAR(255) NOT NULL,
@@ -29,7 +33,7 @@ CREATE TABLE IF NOT EXISTS libri (
   disponibile    BOOLEAN      NOT NULL DEFAULT TRUE,
   visualizzazioni INTEGER     NOT NULL DEFAULT 0,
   utente_id      INTEGER      NOT NULL REFERENCES utenti(id) ON DELETE CASCADE,
-  -- Tipo geometry con SRID 4326 (WGS84)
+  /* Tipo geometry con SRID 4326 (WGS84) */
   posizione      GEOMETRY(Point, 4326) NOT NULL,
   creato_il      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   aggiornato_il  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
@@ -39,7 +43,8 @@ CREATE INDEX IF NOT EXISTS idx_libri_posizione ON libri USING GIST(posizione);
 CREATE INDEX IF NOT EXISTS idx_libri_categoria ON libri(categoria);
 CREATE INDEX IF NOT EXISTS idx_libri_utente ON libri(utente_id);
 
---  TABELLA: richieste_prestito
+/*TABELLA: richieste_prestito */
+
 CREATE TABLE IF NOT EXISTS richieste_prestito (
   id              SERIAL PRIMARY KEY,
   libro_id        INTEGER      NOT NULL REFERENCES libri(id) ON DELETE CASCADE,
@@ -53,7 +58,8 @@ CREATE TABLE IF NOT EXISTS richieste_prestito (
 CREATE INDEX IF NOT EXISTS idx_prestiti_libro   ON richieste_prestito(libro_id);
 CREATE INDEX IF NOT EXISTS idx_prestiti_richied ON richieste_prestito(richiedente_id);
 
---  Aggiorna aggiornato_il automaticamente
+/*  Aggiorna aggiornato_il automaticamente */ 
+
 CREATE OR REPLACE FUNCTION update_aggiornato_il()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -72,9 +78,9 @@ CREATE TRIGGER trg_libri_updated
   BEFORE UPDATE ON libri
   FOR EACH ROW EXECUTE FUNCTION update_aggiornato_il();
 
---  DATI DI TEST (seed)
---  Password per tutti gli utenti di test: "password"
---  (hash bcrypt con 12 rounds)
+/*  DATI DI TEST (seed) */
+/*  Password per tutti gli utenti di test: "password" */
+/*  (hash bcrypt con 12 rounds) */
 
 INSERT INTO utenti (nome, cognome, email, password_hash, bio) VALUES
 ('Andrea', 'Masu', 'andrea.masu@nearbook.com', '$2b$12$ZvnIvjCfmmQwcJGUvYoQtudB2hI2dpWRv9j7ITpVYR1DT6H9Q7CE.', 'Appassionato di lettura e sviluppo software. Milano centro.'),
@@ -84,7 +90,7 @@ INSERT INTO utenti (nome, cognome, email, password_hash, bio) VALUES
 ('Demo', 'User', 'demo@nearbook.it', '$2b$12$ZvnIvjCfmmQwcJGUvYoQtudB2hI2dpWRv9j7ITpVYR1DT6H9Q7CE.', 'Account demo NearBook.')
 ON CONFLICT (email) DO NOTHING;
 
---  Libri di test attorno a Milano centro
+/*  Libri di test attorno a Milano centro */ 
 
 INSERT INTO libri (titolo, autore, anno, categoria, descrizione, disponibile, visualizzazioni, utente_id, posizione) VALUES
 ('Il nome della rosa', 'Umberto Eco', 1980, 'Romanzo', 'Capolavoro del romanzo storico ambientato in un monastero medievale.', TRUE, 34, (SELECT id FROM utenti WHERE email='demo@nearbook.it'), ST_SetSRID(ST_MakePoint(9.1919, 45.4641), 4326)),
@@ -98,7 +104,7 @@ INSERT INTO libri (titolo, autore, anno, categoria, descrizione, disponibile, vi
 ('Il signore degli anelli', 'J.R.R. Tolkien', 1954, 'Fantasy', 'L''epopea fantasy per eccellenza: la saga dell''Anello.', TRUE, 91, (SELECT id FROM utenti WHERE email='demo@nearbook.it'), ST_SetSRID(ST_MakePoint(9.1880, 45.4860), 4326)),
 ('Poesia in forma di rosa', 'Pier Paolo Pasolini', 1964, 'Poesia', 'Raccolta poetica tra le più intense del Novecento italiano.', TRUE, 15, (SELECT id FROM utenti WHERE email='demo@nearbook.it'), ST_SetSRID(ST_MakePoint(9.1860, 45.4875), 4326));
 
---  Richieste di prestito di esempio
+/*  Richieste di prestito di esempio */
 
 INSERT INTO richieste_prestito (libro_id, richiedente_id, stato, messaggio) VALUES
 ((SELECT id FROM libri WHERE titolo='Dune' LIMIT 1), (SELECT id FROM utenti WHERE email='andrea.masu@nearbook.com'), 'pendente', 'Ciao Sara, posso prendere in prestito Dune per due settimane?'),

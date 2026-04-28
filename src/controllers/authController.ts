@@ -4,6 +4,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import pool from '../models/db';
 
 // POST /api/auth/register
+/* Gestisce la registrazione di un nuovo utente. */ 
 export async function register(req: Request, res: Response): Promise<void> {
   const { nome, cognome, email, password } = req.body;
 
@@ -41,6 +42,7 @@ export async function register(req: Request, res: Response): Promise<void> {
 }
 
 // POST /api/auth/login
+/* Gestisce il login di un utente esistente. */
 export async function login(req: Request, res: Response): Promise<void> {
   const { email, password } = req.body;
 

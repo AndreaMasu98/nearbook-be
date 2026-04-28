@@ -5,6 +5,7 @@ export interface AuthRequest extends Request {
   userId?: number;
 }
 
+/* Middleware per autenticazione JWT. Verifica il token e aggiunge userId a req. */
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {

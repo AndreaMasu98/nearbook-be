@@ -1,6 +1,7 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import path from 'path';
 
+/* Configurazione di swagger-jsdoc per generare la documentazione API. Definisce info, schemi e sicurezza. */
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',

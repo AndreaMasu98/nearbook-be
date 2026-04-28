@@ -45,8 +45,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 });
 
 app.listen(PORT, () => {
-  console.log(`BE avviato su http://localhost:${PORT}`);
-  console.log(`Swagger disponibile su http://localhost:${PORT}/swagger`);
+  console.log(`BE avviato`);
 });
 
 export default app;

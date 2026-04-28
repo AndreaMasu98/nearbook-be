@@ -57,7 +57,7 @@ export async function getNearbyBooks(req: Request, res: Response): Promise<void>
     return;
   }
 
-  // Modalità ricerca geografica (originale)
+  // Modalità ricerca geografica
   if (!lat || !lng) {
     res.status(400).json({ error: 'Parametri lat e lng obbligatori oppure search' });
     return;
@@ -120,6 +120,7 @@ export async function getNearbyBooks(req: Request, res: Response): Promise<void>
 }
 
 // GET /api/books/:id
+// Restituisce i dettagli di un libro, con distanza se lat/lng forniti
 export async function getBookById(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
   const { lat, lng } = req.query;
@@ -164,6 +165,7 @@ export async function getBookById(req: Request, res: Response): Promise<void> {
 }
 
 // POST /api/books  (richiede auth)
+// Crea un nuovo libro associato all'utente loggato
 export async function createBook(req: AuthRequest, res: Response): Promise<void> {
   const { titolo, autore, anno, categoria, descrizione, lat, lng } = req.body;
   const coverPath = (req as any).coverPath || null;
