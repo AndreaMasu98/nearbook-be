@@ -101,7 +101,7 @@ INSERT INTO libri (titolo, autore, anno, categoria, descrizione, disponibile, vi
 --  Richieste di prestito di esempio
 
 INSERT INTO richieste_prestito (libro_id, richiedente_id, stato, messaggio) VALUES
-((SELECT id FROM libri WHERE titolo='Dune' LIMIT 1), (SELECT id FROM utenti WHERE email='andrea.masu@example.com'), 'pendente', 'Ciao Sara, posso prendere in prestito Dune per due settimane?'),
-((SELECT id FROM libri WHERE titolo='Il nome della rosa' LIMIT 1), (SELECT id FROM utenti WHERE email='sara.rossi@example.com'), 'accettata', 'Ho sempre voluto leggere Eco! Quando possiamo incontrarci?'),
-((SELECT id FROM libri WHERE titolo='Il signore degli anelli' LIMIT 1), (SELECT id FROM utenti WHERE email='andrea.masu@example.com'), 'pendente', 'Il Signore degli Anelli è nella mia lista da anni!'),
-((SELECT id FROM libri WHERE titolo='Gomorra' LIMIT 1), (SELECT id FROM utenti WHERE email='giulia.ferrari@example.com'), 'rifiutata', 'Purtroppo l''ho già prestato a qualcuno, mi dispiace.');
+((SELECT id FROM libri WHERE titolo='Dune' LIMIT 1), (SELECT id FROM utenti WHERE email='andrea.masu@nearbook.com'), 'pendente', 'Ciao Sara, posso prendere in prestito Dune per due settimane?'),
+((SELECT id FROM libri WHERE titolo='Il nome della rosa' LIMIT 1), (SELECT id FROM utenti WHERE email='sara.rossi@nearbook.com'), 'accettata', 'Ho sempre voluto leggere Eco! Quando possiamo incontrarci?'),
+((SELECT id FROM libri WHERE titolo='Il signore degli anelli' LIMIT 1), (SELECT id FROM utenti WHERE email='andrea.masu@nearbook.com'), 'pendente', 'Il Signore degli Anelli è nella mia lista da anni!'),
+((SELECT id FROM libri WHERE titolo='Gomorra' LIMIT 1), (SELECT id FROM utenti WHERE email='giulia.ferrari@nearbook.com'), 'rifiutata', 'Purtroppo l''ho già prestato a qualcuno, mi dispiace.');
