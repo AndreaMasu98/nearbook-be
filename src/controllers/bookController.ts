@@ -3,12 +3,63 @@ import pool from '../models/db';
 import { AuthRequest } from '../middleware/auth';
 
 // GET /api/books?lat=&lng=&raggio=2000&categoria=
-// Restituisce i libri entro il raggio specificato (default 2km), ordinati per distanza
+// Oppure: GET /api/books?search=titolo
+// Restituisce i libri entro il raggio (se ricerca geografica) o per nome/autore
 export async function getNearbyBooks(req: Request, res: Response): Promise<void> {
-  const { lat, lng, raggio = 2000, categoria } = req.query;
+  const { lat, lng, raggio = 2000, categoria, search } = req.query;
 
+  // Modalità ricerca per nome
+  if (search) {
+    try {
+      let query = `
+        SELECT
+          l.id,
+          l.titolo,
+          l.autore,
+          l.anno,
+          l.categoria,
+          l.descrizione,
+          l.cover_path,
+          l.thumb_path,
+          l.disponibile,
+          l.visualizzazioni,
+          u.nome AS utente_nome,
+          u.cognome AS utente_cognome,
+          ST_X(l.posizione) AS longitudine,
+          ST_Y(l.posizione) AS latitudine,
+          0 AS distanza_metri
+        FROM libri l
+        JOIN utenti u ON l.utente_id = u.id
+        WHERE (LOWER(l.titolo) LIKE LOWER($1) OR LOWER(l.autore) LIKE LOWER($1))
+        AND l.disponibile = TRUE
+      `;
+
+      const params: any[] = [`%${search}%`];
+
+      if (categoria && categoria !== 'tutti') {
+        params.push(categoria as string);
+        query += ` AND l.categoria = $${params.length}`;
+      }
+
+      const result = await pool.query(query, params);
+
+      // Aggiorna visualizzazioni in background
+      if (result.rows.length > 0) {
+        const ids = result.rows.map((r: any) => r.id);
+        pool.query('UPDATE libri SET visualizzazioni = visualizzazioni + 1 WHERE id = ANY($1)', [ids]);
+      }
+
+      res.json({ books: result.rows });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Errore nel recupero dei libri' });
+    }
+    return;
+  }
+
+  // Modalità ricerca geografica (originale)
   if (!lat || !lng) {
-    res.status(400).json({ error: 'Parametri lat e lng obbligatori' });
+    res.status(400).json({ error: 'Parametri lat e lng obbligatori oppure search' });
     return;
   }
 

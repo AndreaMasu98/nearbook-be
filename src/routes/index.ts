@@ -66,28 +66,35 @@ router.post('/auth/login', login);
  * @swagger
  * /api/books:
  *   get:
- *     summary: Ottieni libri vicini con filtri
+ *     summary: Ottieni libri per geolocalizzazione oppure per nome
  *     tags: [Books]
  *     parameters:
  *       - name: lat
  *         in: query
- *         required: true
  *         schema:
  *           type: number
+ *         description: Latitudine (richiesto se search non è presente)
  *       - name: lng
  *         in: query
- *         required: true
  *         schema:
  *           type: number
+ *         description: Longitudine (richiesto se search non è presente)
  *       - name: raggio
  *         in: query
  *         schema:
  *           type: number
  *           default: 2000
+ *         description: Raggio di ricerca in metri (solo per ricerca geografica)
  *       - name: categoria
  *         in: query
  *         schema:
  *           type: string
+ *         description: Filtra per categoria
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Ricerca per titolo o autore (alternativa a lat/lng)
  *     responses:
  *       200:
  *         description: Lista dei libri trovati
